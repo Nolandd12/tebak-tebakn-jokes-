@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tebak-Tebakan Jokes</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #ffd3a5, #fd6585);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+      width: 90%;
+      max-width: 550px;
+      text-align: center;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      animation: blink 2s infinite;
+      font-size: 32px;
+      color: #ff4081;
+    }
+
+    #timer {
+      font-size: 20px;
+      color: #d63031;
+      background: #ffeaa7;
+      padding: 8px 16px;
+      display: inline-block;
+      border-radius: 25px;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    #question-text {
+      font-size: 20px;
+      margin-bottom: 20px;
+      color: #2d3436;
+    }
+
+    button {
+      margin: 8px;
+      padding: 12px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #6a89cc, #38ada9);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #38ada9, #6a89cc);
+      transform: scale(1.05);
+    }
+
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 18px;
+      color: #2d3436;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #next-btn, #restart-btn {
+      background: #fd79a8;
+      margin-top: 20px;
+    }
+
+    #next-btn:hover, #restart-btn:hover {
+      background: #e84393;
+    }
+  </style>
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Tebak-Tebakan Jokes</h1>
+
+    <div id="timer">Waktu: 15</div>
+
+    <div id="question-container">
+      <p id="question-text">kujang kuyang apa yang (-)</p>
+      <div id="options-container">
+        <button onclick="checkAnswer(this)">Kuyang Satu</button>
+        <button onclick="checkAnswer(this)">Kuyang Kamu</button>
+        <button onclick="checkAnswer(this)">Kuyang Cinta</button>
+        <button onclick="checkAnswer(this)">Kuyang Promo</button>
+      </div>
+    </div>
+
+    <div id="result"></div>
+    <button id="next-btn" onclick="loadNextQuestion()" style="display: none;"><audio id="correct-sound" src="tawa.mp3" preload="auto"></audio>
+Lanjut</button>
+    <button id="restart-btn" onclick="restartGame()" style="display: none;">Ulangi</button>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    question: "Kuyang kuyang apa yang (-)?",
+    options: [
+      "Kuyang Satu",
+      "Kuyang nyasar",
+      "Kuyang ke barak",
+      "Kuyang mabuk"
+    ],
+    answer: "Kuyang Satu"
+  },
+  {
+    question: "Apa bedanya kamu sama kalender?",
+    options: [
+      "Kalender ada tanggalnya",
+      "Kamu lebih rumit",
+      "Kalender dicoretin, kamu diingetin",
+      "Kalender bisa dilihat setiap hari, kamu enggak"
+    ],
+    answer: "Kalender ada tanggalnya"
+  },
+  {
+    question: "Mengapa burung tidak pergi sekolah?",
+    options: [
+      "Karena dia sudah pintar",
+      "Karena dia takut di bawa ke barak",
+      "Karena dia bukan manusia",
+      "Karena dia takut ujian"
+    ],
+    answer: "Karena dia sudah pintar"
+  },
+  {
+    question: "Kenapa komputer suka ngambek?",
+    options: [
+      "Karena banyak virus",
+      "Karena tidak dikasih perhatian",
+      "Karena suka error",
+      "Karena terlalu banyak tugas"
+    ],
+    answer: "Karena banyak virus"
+  },
+  {
+    question: "Apa bedanya angkot sama kamu?",
+    options: [
+      "Angkot berhenti kalau ada yang nyetop, kamu berhenti pas ditinggal",
+      "Angkot penuh, kamu kosong",
+      "Angkot bayar, kamu gratis",
+      "Angkot rame, kamu sepi"
+    ],
+    answer: "Angkot berhenti kalau ada yang nyetop, kamu berhenti pas ditinggal"
+  },
+  {
+    question: "Kenapa ikan gak pernah tidur di kasur?",
+    options: [
+      "Karena basah",
+      "Karena dia tinggal di air",
+      "Karena kasur tenggelam",
+      "Karena gak muat"
+    ],
+    answer: "Karena dia tinggal di air"
+  },
+  {
+    question: "Apa yang naik tapi tidak pernah turun?",
+    options: [
+      "Usia",
+      "Balon",
+      "Cinta",
+      "Harga BBM"
+    ],
+    answer: "Usia"
+  }
+];
+
+
+
+function startTimer() {
+  clearInterval(timer); // pastikan timer lama dihentikan dulu
+  timeLeft = 15;
+  document.getElementById('timer').innerText = "Waktu: " + timeLeft;
+  timer = setInterval(() => {
+    timeLeft--;
+    document.getElementById('timer').innerText = "Waktu: " + timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      gameOver("Waktu habis! Game Over!");
+    }
+  }, 1000);
+}
+
+function checkAnswer(button) {
+  clearInterval(timer);
+  const userAnswer = button.innerText;
+  const correctAnswer = questions[currentIndex].answer;
+
+  if (userAnswer === correctAnswer) {
+    // Mainkan suara tawa saat benar
+    document.getElementById('correct-sound').play();
+
+    document.getElementById('result').innerText = "Anda Benar!";
+    document.getElementById('next-btn').style.display = "inline-block";
+    disableOptions();
+  } else {
+    gameOver("Jawaban salah. Game Over!");
+  }
+}
+
+function disableOptions() {
+  const buttons = document.querySelectorAll('#options-container button');
+  buttons.forEach(btn => btn.disabled = true);
+}
+
+function loadNextQuestion() {
+  currentIndex++;
+  if (currentIndex >= questions.length) {
+    document.getElementById('question-text').innerText = "Selamat! Anda telah menyelesaikan semua tebakan!";
+    document.getElementById('options-container').innerHTML = "";
+    document.getElementById('next-btn').style.display = "none";
+    document.getElementById('timer').style.display = "none";
+    return;
+  }
+
+  const q = questions[currentIndex];
+  document.getElementById('question-text').innerText = q.question;
+  const container = document.getElementById('options-container');
+  container.innerHTML = '';
+
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.innerText = opt;
+    btn.onclick = () => checkAnswer(btn);
+    container.appendChild(btn);
+  });
+
+  document.getElementById('result').innerText = "";
+  document.getElementById('next-btn').style.display = "none";
+  document.getElementById('timer').style.display = "block";
+
+  // Mulai timer baru setiap soal dimuat
+  startTimer();
+}
+
+function gameOver(message) {
+  clearInterval(timer);
+  document.getElementById('result').innerText = message;
+  disableOptions();
+  document.getElementById('next-btn').style.display = "none";
+  document.getElementById('restart-btn').style.display = "inline-block";
+  document.getElementById('timer').style.display = "none";
+}
+
+function restartGame() {
+  currentIndex = -1; // supaya loadNextQuestion jadi 0 saat dipanggil
+  document.getElementById('restart-btn').style.display = "none";
+  loadNextQuestion();
+}
+
+// Saat halaman load, langsung tampilkan soal pertama dan timer
+window.onload = () => {
+  currentIndex = -1;
+  loadNextQuestion();
+};
+
+  </script>
+</body>
+</html>
